@@ -26,6 +26,6 @@ Main locations:
 
 The synchronization scripts permanently delete the target `730` directory before restoring it. Exit Steam and confirm OneDrive has finished syncing before use.
 
-## License
+## Copyright
 
-Original code and code documentation are licensed under the [Apache License 2.0](./LICENSE). Personal material, branding, game content, and third-party material are excluded. See [NOTICE](./NOTICE) and [LICENSE_SCOPE.md](./LICENSE_SCOPE.md).
+Original code is licensed under the [Apache License 2.0](./LICENSE). Personal branding and assets are excluded.
