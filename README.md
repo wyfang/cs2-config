@@ -1,15 +1,22 @@
 # CS2 Config
 
-一套按 Steam 目录组织的 CS2 个人配置，包含按键、准星、画面设置与 Windows 备份同步脚本。
+一套按 Steam 目录组织的 CS2 个人配置，包含按键、SOCD 移动、准星、画面设置与 Windows 备份同步脚本。
 
 [English](./README.en.md)
 
 ## 功能
 
+### Wi-Fi SOCD
+
+SOCD 用于处理同时按下相反方向键的情况。`wifi-socd.cfg` 为 `A` / `D`（左右）和 `W` / `S`（前后）分别配置“最后输入优先”的移动逻辑，两组方向独立处理。
+
+例如，按住 `A` 后再按 `D`，脚本将方向切换为向右；松开 `D` 时，如果 `A` 仍按住，则恢复向左；两键都松开后，停止该方向轴的输入。`W` / `S` 使用相同逻辑。
+
 ### 主要按键
 
 | 按键 | 功能 |
 | --- | --- |
+| `W` / `A` / `S` / `D` | SOCD 移动，相反方向键采用最后输入优先 |
 | `/` / `Mouse4` | 麦克风常开切换 / 按住说话 |
 | `O` | 在跟随后坐力准星与常规准星之间切换 |
 | `Mouse5` | 切换两套持枪视角 |
@@ -31,6 +38,12 @@
 
 - 游戏脚本：`steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg`
 - 用户配置：`userdata/<Steam userdata ID>/730`
+
+### SOCD 配置
+
+`autoexec.cfg` 已包含 `exec wifi-socd`，加载主配置时会自动加载 SOCD。也可在控制台执行 `exec wifi-socd` 单独加载。
+
+加载后会覆盖 `W` / `A` / `S` / `D` 的绑定，并将 `joy_side_sensitivity` 和 `joy_forward_sensitivity` 设为 `1`。配置用于个人测试与研究，实际效果以当前游戏版本和服务器行为为准。
 
 ### Windows 脚本
 

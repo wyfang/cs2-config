@@ -1,15 +1,22 @@
 # CS2 Config
 
-A personal CS2 configuration arranged as a Steam directory tree, with key bindings, crosshairs, video settings, and Windows backup and synchronization scripts.
+A personal CS2 configuration arranged as a Steam directory tree, with key bindings, SOCD movement, crosshairs, video settings, and Windows backup and synchronization scripts.
 
 [简体中文](./README.md)
 
 ## Features
 
+### Wi-Fi SOCD
+
+SOCD handles simultaneous inputs in opposite directions. `wifi-socd.cfg` configures last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently.
+
+For example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
+
 ### Key bindings
 
 | Key | Action |
 | --- | --- |
+| `W` / `A` / `S` / `D` | SOCD movement with last input priority for opposing directions |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
 | `O` | Switch between a recoil-following crosshair and a regular crosshair |
 | `Mouse5` | Switch between two viewmodels |
@@ -31,6 +38,12 @@ Main locations:
 
 - Game scripts: `steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg`
 - User data: `userdata/<Steam userdata ID>/730`
+
+### SOCD configuration
+
+`autoexec.cfg` already contains `exec wifi-socd`, so loading the main configuration also loads SOCD automatically. You can also run `exec wifi-socd` in the console to load it separately.
+
+Loading it replaces the `W` / `A` / `S` / `D` bindings and sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
 
 ### Windows scripts
 
