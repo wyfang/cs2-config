@@ -18,7 +18,7 @@ For example, holding `A` and then pressing `D` switches the configured direction
 | --- | --- |
 | `W` / `A` / `S` / `D` | SOCD movement with last input priority for opposing directions |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
-| `O` | Switch between a recoil-following crosshair and a regular crosshair |
+| `O` | Switch between a white dot and the personal regular crosshair; both follow recoil |
 | `Mouse5` | Switch between two viewmodels |
 | `V` | Mark a position and send warnings in Chinese and English |
 | `\` | Toggle master volume between 10% and 100% |
@@ -44,6 +44,12 @@ Main locations:
 `autoexec.cfg` already contains `exec wifi-socd`, so loading the main configuration also loads SOCD automatically. You can also run `exec wifi-socd` in the console to load it separately.
 
 Loading it replaces the `W` / `A` / `S` / `D` bindings and sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
+
+### O-key crosshairs
+
+`O` cycles through `wifi-crosshair1.cfg` (white dot) and `wifi-crosshair2.cfg` (Dynamic Quad). Both use the new pixel commands. The regular preset follows the in-game screenshots: length `120`, thickness `31`, gap `128`, opacity `254`, and no outline. The dot retains opacity `160` and a full outline, with thickness initially set to `2` pixels. Its old value of `1.2` was not measured in pixels, so the migrated visual size still needs an in-game check.
+
+Only these two crosshair files are retained. To update, copy `wifi-crosshair1.cfg`, `wifi-crosshair2.cfg`, and the matching `autoexec.cfg` into the game's `game/csgo/cfg`. Run `exec autoexec` in the console to reload the O-key binding, then press `O` to switch. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values.
 
 ### Windows scripts
 
