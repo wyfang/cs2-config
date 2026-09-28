@@ -1,6 +1,6 @@
 # CS2 Config
 
-A personal CS2 configuration arranged as a Steam directory tree, with key bindings, SOCD movement, crosshairs, video settings, and Windows backup and synchronization scripts.
+A personal CS2 configuration arranged as a Steam directory tree, with key bindings, optional SOCD movement, crosshairs, video settings, and Windows backup and synchronization scripts.
 
 [简体中文](./README.md)
 
@@ -8,18 +8,18 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 ### Wi-Fi SOCD
 
-SOCD handles simultaneous inputs in opposite directions. `wifi-socd.cfg` configures last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently.
+The supplied key configuration initially uses standard `W` / `A` / `S` / `D` movement; subsequent launches retain the last saved SOCD choice. Running `exec wifi-socd` manually in the console enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
 
-For example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
+Once enabled, for example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
 
 ### Key bindings
 
 | Key | Action |
 | --- | --- |
-| `W` / `A` / `S` / `D` | SOCD movement with last input priority for opposing directions |
+| `W` / `A` / `S` / `D` | Standard movement initially; subsequently retain the last saved SOCD choice |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
 | `O` | Cycle through three crosshair presets; all follow recoil |
-| `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color |
+| `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color while preserving the current SOCD state |
 | `Mouse5` | Switch between two viewmodels with their matching crosshair and HUD color |
 | `V` | Mark a position and send warnings in Chinese and English |
 | `\` | Toggle master volume between 10% and 100% |
@@ -42,9 +42,25 @@ Main locations:
 
 ### SOCD configuration
 
-`autoexec.cfg` already contains `exec wifi-socd`, so loading the main configuration also loads SOCD automatically. You can also run `exec wifi-socd` in the console to load it separately.
+`autoexec.cfg` loads the runtime command definitions in `wifi-socd-core.cfg` without overwriting WASD bindings. To enable SOCD, manually run this command in the game console:
 
-Loading it replaces the `W` / `A` / `S` / `D` bindings and sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
+```text
+exec wifi-socd
+```
+
+Enabling it replaces the `W` / `A` / `S` / `D` bindings and prints the `Wi-Fi SOCD ON!!` banner after saving the configuration. The core definitions file sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
+
+To disable SOCD, run:
+
+```text
+exec wifi-socd-off
+```
+
+The off file clears directional input, restores standard WASD, and prints the `Wi-Fi SOCD OFF!!` banner after saving the configuration, without changing the viewmodel, crosshair, or HUD color. Both switch files run `host_writeconfig` to save the current game configuration, including WASD bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
+
+Running `exec autoexec` or pressing `P` reloads the main configuration without changing whether SOCD is enabled. Because the script's key handling commands are reinitialized, release all movement keys before enabling, disabling, or reloading.
+
+No launch option is needed to force either switch file. Remove any previously added `+exec wifi-socd-off` or `+exec wifi-socd` so it does not override the saved choice. Copy `autoexec.cfg`, `wifi-socd-core.cfg`, `wifi-socd.cfg`, and `wifi-socd-off.cfg` together when updating the game configuration.
 
 ### O-key crosshairs
 
@@ -58,7 +74,7 @@ Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 → 3 �
 
 For `Mouse5`, mode 1 loads crosshair 1 and HUD color `11`; mode 2 loads crosshair 2 and HUD color `0`. Each mode sets the next `O` press to the following preset. `P` reloads the main configuration and restores mode 1.
 
-To update, copy all three `wifi-crosshair*.cfg` files and the matching `autoexec.cfg` into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. Some comments in the original files no longer match their values; the table reflects the actual configuration. Crosshair 2 retains opacity `0` from the latest backup.
+To update, copy all three `wifi-crosshair*.cfg` files together with the main configuration and SOCD files listed above into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. Some comments in the original files no longer match their values; the table reflects the actual configuration. Crosshair 2 retains opacity `0` from the latest backup.
 
 ### Windows scripts
 
@@ -69,6 +85,8 @@ To update, copy all three `wifi-crosshair*.cfg` files and the matching `autoexec
 | `同步所有账号730-Onedrive.bat` | Performs the same full `730` restoration for every detected real Steam account |
 
 ## Notes
+
+The repository's `.gitignore` excludes the personal China-region launch record `cnlauncher.txt`, item preferences in `cs2_preferred_items.txt`, and `workshop_saves/` Workshop saves. These files can remain in private backups; the key bindings, crosshairs, and SOCD configuration do not depend on them. The ignore rules neither delete existing backups nor change what the Windows scripts restore.
 
 The synchronization scripts use fixed paths under `C:\Steam` and `%OneDrive%\CS2`. Exit Steam completely and confirm that OneDrive has finished syncing before running them. Both synchronization scripts permanently delete the target account's entire existing `730` directory; they do not merge individual files.
 
