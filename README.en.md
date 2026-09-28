@@ -18,8 +18,9 @@ For example, holding `A` and then pressing `D` switches the configured direction
 | --- | --- |
 | `W` / `A` / `S` / `D` | SOCD movement with last input priority for opposing directions |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
-| `O` | Switch between a white dot and the personal regular crosshair; both follow recoil |
-| `Mouse5` | Switch between two viewmodels |
+| `O` | Cycle through three crosshair presets; all follow recoil |
+| `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color |
+| `Mouse5` | Switch between two viewmodels with their matching crosshair and HUD color |
 | `V` | Mark a position and send warnings in Chinese and English |
 | `\` | Toggle master volume between 10% and 100% |
 | `.` | Toggle `voice_loopback` |
@@ -47,9 +48,17 @@ Loading it replaces the `W` / `A` / `S` / `D` bindings and sets `joy_side_sensit
 
 ### O-key crosshairs
 
-`O` cycles through `wifi-crosshair1.cfg` (white dot) and `wifi-crosshair2.cfg` (Dynamic Quad). Both use the new pixel commands. The regular preset follows the in-game screenshots: length `120`, thickness `31`, gap `128`, opacity `254`, and no outline. The dot retains opacity `160` and a full outline, with thickness initially set to `2` pixels. Its old value of `1.2` was not measured in pixels, so the migrated visual size still needs an in-game check.
+Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 → 3 → 1`. All three presets follow recoil and use the new pixel commands. Their current values are:
 
-Only these two crosshair files are retained. To update, copy `wifi-crosshair1.cfg`, `wifi-crosshair2.cfg`, and the matching `autoexec.cfg` into the game's `game/csgo/cfg`. Run `exec autoexec` in the console to reload the O-key binding, then press `O` to switch. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values.
+| Preset | Style and color | Length / thickness / gap (pixels) | Opacity / outline |
+| --- | --- | --- | --- |
+| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 31 / 999` | `180` / full outline |
+| `wifi-crosshair2.cfg` | Dynamic Quad, white, currently fully transparent | `120 / 31 / 128` | `0` / no outline |
+| `wifi-crosshair3.cfg` | White dot | `0 / 4 / 0` | `255` / full outline |
+
+For `Mouse5`, mode 1 loads crosshair 1 and HUD color `11`; mode 2 loads crosshair 2 and HUD color `0`. Each mode sets the next `O` press to the following preset. `P` reloads the main configuration and restores mode 1.
+
+To update, copy all three `wifi-crosshair*.cfg` files and the matching `autoexec.cfg` into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. Some comments in the original files no longer match their values; the table reflects the actual configuration. Crosshair 2 retains opacity `0` from the latest backup.
 
 ### Windows scripts
 
