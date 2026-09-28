@@ -1,1 +1,0 @@
-{"primary":"weapon_ak47","secondary":"weapon_deagle","knife":null,"armor":1,"ammo":1,"playermodels":2,"hs":1,"kzPb":null,"killPbTimes":{}}
