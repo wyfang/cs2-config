@@ -29,7 +29,9 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 | `\` | Toggle master volume between 10% and 100% |
 | `.` | Toggle `voice_loopback` |
 | `Caps Lock` | Switch the weapon between left and right hands |
-| `F5`–`F8` | Cycle preset chat messages |
+| `F5`–`F7` | Cycle preset chat messages |
+| `F8` | Send the preset message explaining an unsuccessful commendation |
+| `F9` / `F10` | Send the C4 countdown message for 7 seconds / 12 seconds |
 | `K` / `Alt` | Run model or debugging commands only where cheats are allowed |
 
 ## Usage

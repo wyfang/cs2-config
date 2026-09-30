@@ -20,6 +20,8 @@
 		"F6"		"f6_say_glhf"
 		"F7"		"f7_say_commend"
 		"F8"		"say 对不起，给你点赞的时候提示无法完成，众所周知，一个账号一天只能提交3次，非常遗憾，但我保证我会点击下次为您服务，谢谢！"
+		"F9"		"say C4 倒计时 7秒提示 - 来自 live.steam.pet"
+		"F10"		"say C4 倒计时 12秒提示 - 来自 live.steam.pet"
 		"MWHEELDOWN"		"+jump"
 		"-"		"say_team -98hp"
 		"."		"toggle voice_loopback 1 0"
