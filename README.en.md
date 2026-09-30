@@ -1,5 +1,8 @@
 # CS2 Config
 
+> [!TIP]
+> **For players in China:** In your Steam library, right-click CS2 → **Properties → General → Launch Options** and add `-promptperfectworld`. Each launch will display a choice between the Perfect World (China) and international versions, so you can select the region manually and avoid system proxy settings affecting automatic region selection.
+
 A personal CS2 configuration arranged as a Steam directory tree, with key bindings, optional SOCD movement, crosshairs, video settings, and Windows backup and synchronization scripts.
 
 [简体中文](./README.md)

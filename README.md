@@ -1,5 +1,8 @@
 # CS2 Config
 
+> [!TIP]
+> **中国玩家启动提示：** 在 Steam 库中右键 CS2 → **属性 → 通用 → 启动选项**，添加 `-promptperfectworld`。每次启动 CS2 时都会弹出国服／国际服选择窗口，方便手动选择区服，避免系统代理影响自动区服选择。
+
 一套按 Steam 目录组织的 CS2 个人配置，包含按键、可选 SOCD 移动、准星、画面设置与 Windows 备份同步脚本。
 
 [English](./README.en.md)
