@@ -67,7 +67,7 @@ No launch option is needed to force either switch file. Remove any previously ad
 
 Video settings reside in `userdata/<Steam userdata ID>/730/local/cfg/cs2_video.txt`, separately from the game's `autoexec.cfg`. The current preset includes `1920×1080`, a borderless window, disabled VSync, `4`-sample MSAA, and independent shadow, texture, and particle settings; it mixes quality levels.
 
-The file also records `VendorID`, `DeviceID`, `Version`, and `Autoconfig`. A different GPU or game version may trigger hardware detection and rewrite the settings. Exit the game and Steam completely before restoring, confirm the actual signed-in account and Steam installation's `730/local/cfg` path, then compare `cs2_video.txt` before and after the first launch. The scripts default to `C:\Steam`; adjust them for other installation paths. Copying only `game/csgo/cfg` does not restore this video file.
+The file also records `VendorID`, `DeviceID`, `Version`, and `Autoconfig`. A different GPU or game version may trigger hardware detection and rewrite the settings. Closing the game and Steam before restoring is recommended; confirm the actual signed-in account and Steam installation's `730/local/cfg` path, then compare `cs2_video.txt` before and after the first launch. The scripts default to `C:\Steam`; adjust them for other installation paths. Copying only `game/csgo/cfg` does not restore this video file.
 
 Do not force the old GPU identifiers as universal values across computers. Let the new computer complete hardware detection, verify and apply the desired video settings in-game, then back up its generated file. Read-only status only restricts writes; it does not guarantee acceptance of an old computer's settings and prevents saving later video changes.
 
@@ -97,7 +97,11 @@ To update, copy all three `wifi-crosshair*.cfg` files together with the main con
 
 The repository's `.gitignore` excludes the personal China-region launch record `cnlauncher.txt`, item preferences in `cs2_preferred_items.txt`, and `workshop_saves/` Workshop saves. These files can remain in private backups; the key bindings, crosshairs, and SOCD configuration do not depend on them. The ignore rules neither delete existing backups nor change what the Windows scripts restore.
 
-The synchronization scripts use fixed paths under `C:\Steam` and `%OneDrive%\CS2`. Exit Steam completely and confirm that OneDrive has finished syncing before running them. Both synchronization scripts permanently delete the target account's entire existing `730` directory; they do not merge individual files.
+The scripts use fixed paths under `C:\Steam` and `%OneDrive%\CS2`.
+
+The backup script can run while Steam or CS2 is running; neither needs to be closed first. It copies files individually as they exist on disk when copied, without asking the game to save its settings. Settings that have not yet been written to disk are not included.
+
+The two synchronization scripts restore configuration by permanently deleting the target account's entire existing `730` directory and copying the OneDrive restore source; they do not merge individual files. The scripts do not require Steam or CS2 to be closed, but closing the game and Steam and confirming that the OneDrive restore source has finished syncing before restoring is recommended, so the running game or cloud synchronization does not subsequently overwrite the restored files.
 
 See `autoexec.cfg` and `wifi-*.cfg` for the full bindings. `730-Original` is the sole backup file list: changes to it apply to the next backup, while restoration always copies the complete restore source.
 

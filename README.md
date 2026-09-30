@@ -67,7 +67,7 @@ exec wifi-socd-off
 
 画质文件位于 `userdata/<Steam userdata ID>/730/local/cfg/cs2_video.txt`，与游戏目录中的 `autoexec.cfg` 分开。当前预设包含 `1920×1080`、无边框窗口、关闭垂直同步、`4` 倍 MSAA，以及阴影、纹理、粒子等独立参数，是混合画质配置。
 
-该文件同时记录 `VendorID`、`DeviceID`、`Version` 和 `Autoconfig`；更换显卡或游戏版本后，游戏可能重新检测硬件并改写设置。迁移时完全退出游戏与 Steam，确认复制到实际登录账号和实际 Steam 安装目录下的 `730/local/cfg`，再比较首次启动前后的 `cs2_video.txt`。脚本默认使用 `C:\Steam`，其他安装位置需要自行调整；只覆盖 `game/csgo/cfg` 无法恢复此画质文件。
+该文件同时记录 `VendorID`、`DeviceID`、`Version` 和 `Autoconfig`；更换显卡或游戏版本后，游戏可能重新检测硬件并改写设置。迁移时建议先退出游戏与 Steam，确认复制到实际登录账号和实际 Steam 安装目录下的 `730/local/cfg`，再比较首次启动前后的 `cs2_video.txt`。脚本默认使用 `C:\Steam`，其他安装位置需要自行调整；只覆盖 `game/csgo/cfg` 无法恢复此画质文件。
 
 不要把旧显卡标识作为跨电脑通用值强行保留。新电脑完成硬件检测后，在游戏中核对并应用所需画质，再备份该电脑生成的文件。设为只读只能限制写入，不能保证游戏接受旧电脑的参数，也会妨碍后续保存画质调整。
 
@@ -97,7 +97,11 @@ exec wifi-socd-off
 
 仓库的 `.gitignore` 排除个人国服启动记录 `cnlauncher.txt`、物品偏好 `cs2_preferred_items.txt` 与 `workshop_saves/` 创意工坊存档。这些文件可留在私人备份中，不影响此处的按键、准星和 SOCD 配置；忽略规则不会删除现有备份或改变 Windows 脚本的恢复范围。
 
-同步脚本固定使用 `C:\Steam` 与 `%OneDrive%\CS2`。运行前必须完全退出 Steam，并确认 OneDrive 已同步完成；两个同步脚本会永久删除目标账号原有的整个 `730`，不会逐文件合并。
+脚本固定使用 `C:\Steam` 与 `%OneDrive%\CS2`。
+
+备份脚本可在 Steam 或 CS2 运行时执行，无需先退出；它逐个复制执行时磁盘上的实际文件，不会主动让游戏保存设置，尚未写入文件的设置不会包含在备份中。
+
+两个同步脚本用于恢复配置，会永久删除目标账号原有的整个 `730`，再复制 OneDrive 恢复源，不会逐文件合并。脚本不要求 Steam 或 CS2 已退出，但建议恢复前退出游戏与 Steam，并确认 OneDrive 恢复源已同步完成，以免运行中的游戏或云同步随后重新写入并覆盖恢复的文件。
 
 完整绑定以 `autoexec.cfg` 与 `wifi-*.cfg` 为准。`730-Original` 是备份文件的唯一清单；清单变化会自动反映到下一次备份，恢复脚本则始终复制完整恢复源。
 
