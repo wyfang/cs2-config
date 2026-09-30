@@ -8,7 +8,7 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 ### Wi-Fi SOCD
 
-The supplied key configuration initially uses standard `W` / `A` / `S` / `D` movement; subsequent launches retain the last saved SOCD choice. Running `exec wifi-socd` manually in the console enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
+The supplied key configuration initially uses standard `W` / `A` / `S` / `D` movement; subsequent launches retain the last saved SOCD choice. Pressing `I` or running `exec wifi-socd` in the console enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
 
 Once enabled, for example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
 
@@ -18,6 +18,7 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 | --- | --- |
 | `W` / `A` / `S` / `D` | Standard movement initially; subsequently retain the last saved SOCD choice |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
+| `I` | Toggle SOCD, replacing the previous loadout display toggle; retain the saved choice |
 | `O` | Cycle through three crosshair presets; all follow recoil |
 | `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color while preserving the current SOCD state |
 | `Mouse5` | Switch between two viewmodels with their matching crosshair and HUD color |
@@ -33,7 +34,7 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 1. Back up existing settings, then copy `steamapps` and `userdata` into the Steam root, such as `C:\Steam`.
 2. Replace `userdata/89582913` with your own Steam userdata ID. Also update the hard-coded account ID in scripts that target the primary account.
 3. Start CS2 and run `exec autoexec`, or confirm that `autoexec.cfg` loads automatically.
-4. Making `cs2_video.txt` read-only is recommended if you want to preserve these video settings.
+4. On a new computer, verify the video file path and loaded settings as described below; `exec autoexec` does not restore the video settings in `cs2_video.txt`.
 
 Main locations:
 
@@ -42,7 +43,7 @@ Main locations:
 
 ### SOCD configuration
 
-`autoexec.cfg` loads the runtime command definitions in `wifi-socd-core.cfg` without overwriting WASD bindings. To enable SOCD, manually run this command in the game console:
+`autoexec.cfg` loads the runtime command definitions in `wifi-socd-core.cfg` without overwriting WASD or `I` bindings. Press `I` to alternate between enabling and disabling SOCD, replacing `show_loadout_toggle` (the loadout display toggle). You can also enable it directly in the console:
 
 ```text
 exec wifi-socd
@@ -56,11 +57,19 @@ To disable SOCD, run:
 exec wifi-socd-off
 ```
 
-The off file clears directional input, restores standard WASD, and prints the `Wi-Fi SOCD OFF!!` banner after saving the configuration, without changing the viewmodel, crosshair, or HUD color. Both switch files run `host_writeconfig` to save the current game configuration, including WASD bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
+The off file clears directional input, restores standard WASD, and prints the `Wi-Fi SOCD OFF!!` banner after saving the configuration, without changing the viewmodel, crosshair, or HUD color. The on file binds `I` to `exec wifi-socd-off`; the off file binds it to `exec wifi-socd`. Both switch files run `host_writeconfig` to save the current game configuration, including WASD and `I` bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
 
 Running `exec autoexec` or pressing `P` reloads the main configuration without changing whether SOCD is enabled. Because the script's key handling commands are reinitialized, release all movement keys before enabling, disabling, or reloading.
 
-No launch option is needed to force either switch file. Remove any previously added `+exec wifi-socd-off` or `+exec wifi-socd` so it does not override the saved choice. Copy `autoexec.cfg`, `wifi-socd-core.cfg`, `wifi-socd.cfg`, and `wifi-socd-off.cfg` together when updating the game configuration.
+No launch option is needed to force either switch file. Remove any previously added `+exec wifi-socd-off` or `+exec wifi-socd` so it does not override the saved choice. If you update only the game CFG files without copying the supplied account key configuration, run `exec wifi-socd` or `exec wifi-socd-off` once to select the current state and establish the `I` binding. Copy `autoexec.cfg`, `wifi-socd-core.cfg`, `wifi-socd.cfg`, and `wifi-socd-off.cfg` together when updating the game configuration.
+
+### Video settings on a new computer
+
+Video settings reside in `userdata/<Steam userdata ID>/730/local/cfg/cs2_video.txt`, separately from the game's `autoexec.cfg`. The current preset includes `1920×1080`, a borderless window, disabled VSync, `4`-sample MSAA, and independent shadow, texture, and particle settings; it mixes quality levels.
+
+The file also records `VendorID`, `DeviceID`, `Version`, and `Autoconfig`. A different GPU or game version may trigger hardware detection and rewrite the settings. Exit the game and Steam completely before restoring, confirm the actual signed-in account and Steam installation's `730/local/cfg` path, then compare `cs2_video.txt` before and after the first launch. The scripts default to `C:\Steam`; adjust them for other installation paths. Copying only `game/csgo/cfg` does not restore this video file.
+
+Do not force the old GPU identifiers as universal values across computers. Let the new computer complete hardware detection, verify and apply the desired video settings in-game, then back up its generated file. Read-only status only restricts writes; it does not guarantee acceptance of an old computer's settings and prevents saving later video changes.
 
 ### O-key crosshairs
 

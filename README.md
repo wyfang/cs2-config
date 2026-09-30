@@ -8,7 +8,7 @@
 
 ### Wi-Fi SOCD
 
-首次使用仓库随附的按键配置时为普通 `W` / `A` / `S` / `D` 移动，之后沿用上一次保存的 SOCD 开关状态。在控制台手动执行 `exec wifi-socd` 后，`wifi-socd.cfg` 会为 `A` / `D`（左右）和 `W` / `S`（前后）启用“最后输入优先”的移动逻辑，两组方向独立处理。SOCD 使用独立文件开关，重载主配置不会改变其开关选择。
+首次使用仓库随附的按键配置时为普通 `W` / `A` / `S` / `D` 移动，之后沿用上一次保存的 SOCD 开关状态。按 `I` 或在控制台执行 `exec wifi-socd` 后，`wifi-socd.cfg` 会为 `A` / `D`（左右）和 `W` / `S`（前后）启用“最后输入优先”的移动逻辑，两组方向独立处理。SOCD 使用独立文件开关，重载主配置不会改变其开关选择。
 
 启用后，例如按住 `A` 后再按 `D`，脚本将方向切换为向右；松开 `D` 时，如果 `A` 仍按住，则恢复向左；两键都松开后，停止该方向轴的输入。`W` / `S` 使用相同逻辑。
 
@@ -18,6 +18,7 @@
 | --- | --- |
 | `W` / `A` / `S` / `D` | 首次使用为普通移动，此后沿用上次保存的 SOCD 开关状态 |
 | `/` / `Mouse4` | 麦克风常开切换 / 按住说话 |
+| `I` | 切换 SOCD 开关，替换原来的装备显示切换功能；保存后沿用所选状态 |
 | `O` | 循环切换三套准星，均跟随后坐力 |
 | `P` | 重新加载 `autoexec.cfg`，恢复启动时的视角、准星与 HUD 配色，保留当前 SOCD 状态 |
 | `Mouse5` | 切换两套持枪视角，同时切换对应准星与 HUD 配色 |
@@ -33,7 +34,7 @@
 1. 先备份现有设置，再下载仓库并将 `steamapps`、`userdata` 复制到 Steam 根目录，例如 `C:\Steam`。
 2. 将 `userdata/89582913` 替换为自己的 Steam userdata ID；处理主账号的脚本中也要修改固定账号 ID。
 3. 启动 CS2，在控制台执行 `exec autoexec`，或确认游戏已自动加载 `autoexec.cfg`。
-4. 建议将 `cs2_video.txt` 设为只读，以保留仓库中的画面参数。
+4. 在新电脑上核对下节的画质文件路径与加载结果；`exec autoexec` 不会恢复 `cs2_video.txt` 中的画质设置。
 
 主要位置：
 
@@ -42,7 +43,7 @@
 
 ### SOCD 配置
 
-`autoexec.cfg` 加载 `wifi-socd-core.cfg` 准备运行所需的命令定义，但不覆盖 WASD 绑定。需要 SOCD 时，在游戏控制台手动执行：
+`autoexec.cfg` 加载 `wifi-socd-core.cfg` 准备运行所需的命令定义，但不覆盖 WASD 或 `I` 绑定。按 `I` 可交替开启和关闭 SOCD，替换原来的 `show_loadout_toggle`（装备显示切换）。也可在控制台直接开启：
 
 ```text
 exec wifi-socd
@@ -56,11 +57,19 @@ exec wifi-socd
 exec wifi-socd-off
 ```
 
-关闭文件清零方向输入并恢复普通 WASD，保存配置后打印 `Wi-Fi SOCD OFF!!` 图案，不修改视角、准星或 HUD 配色。两个开关文件都会执行 `host_writeconfig` 保存当前游戏配置（包含 WASD 绑定）；下次启动时，主配置重新准备 SOCD 命令定义，并沿用保存的绑定，从而恢复上一次选择。用户按键配置必须可写；重新覆盖 `userdata` 或云同步覆盖本地配置也可能改变保存的选择。
+关闭文件清零方向输入并恢复普通 WASD，保存配置后打印 `Wi-Fi SOCD OFF!!` 图案，不修改视角、准星或 HUD 配色。开启文件将 `I` 绑定为 `exec wifi-socd-off`，关闭文件将其绑定为 `exec wifi-socd`。两个开关文件都会执行 `host_writeconfig` 保存当前游戏配置（包含 WASD 和 `I` 绑定）；下次启动时，主配置重新准备 SOCD 命令定义，并沿用保存的绑定，从而恢复上一次选择。用户按键配置必须可写；重新覆盖 `userdata` 或云同步覆盖本地配置也可能改变保存的选择。
 
 执行 `exec autoexec` 或按 `P` 会重载主配置，但不改变 SOCD 的开关选择。由于脚本的按键处理命令会重新初始化，启用、停用或重载前应松开所有移动键。
 
-不需要在 Steam 启动选项中强制执行开关文件；若之前添加过 `+exec wifi-socd-off` 或 `+exec wifi-socd`，应移除以免覆盖保存的选择。更新游戏配置时应同时复制 `autoexec.cfg`、`wifi-socd-core.cfg`、`wifi-socd.cfg` 与 `wifi-socd-off.cfg`。
+不需要在 Steam 启动选项中强制执行开关文件；若之前添加过 `+exec wifi-socd-off` 或 `+exec wifi-socd`，应移除以免覆盖保存的选择。如果只更新游戏 CFG、没有复制随附的账号按键配置，先执行一次 `exec wifi-socd` 或 `exec wifi-socd-off`，选择当前状态并建立 `I` 键绑定。更新游戏配置时应同时复制 `autoexec.cfg`、`wifi-socd-core.cfg`、`wifi-socd.cfg` 与 `wifi-socd-off.cfg`。
+
+### 画质与新电脑迁移
+
+画质文件位于 `userdata/<Steam userdata ID>/730/local/cfg/cs2_video.txt`，与游戏目录中的 `autoexec.cfg` 分开。当前预设包含 `1920×1080`、无边框窗口、关闭垂直同步、`4` 倍 MSAA，以及阴影、纹理、粒子等独立参数，是混合画质配置。
+
+该文件同时记录 `VendorID`、`DeviceID`、`Version` 和 `Autoconfig`；更换显卡或游戏版本后，游戏可能重新检测硬件并改写设置。迁移时完全退出游戏与 Steam，确认复制到实际登录账号和实际 Steam 安装目录下的 `730/local/cfg`，再比较首次启动前后的 `cs2_video.txt`。脚本默认使用 `C:\Steam`，其他安装位置需要自行调整；只覆盖 `game/csgo/cfg` 无法恢复此画质文件。
+
+不要把旧显卡标识作为跨电脑通用值强行保留。新电脑完成硬件检测后，在游戏中核对并应用所需画质，再备份该电脑生成的文件。设为只读只能限制写入，不能保证游戏接受旧电脑的参数，也会妨碍后续保存画质调整。
 
 ### O 键准星
 

@@ -8,7 +8,7 @@
 		"v"		"player_ping; exec wifi-watch-this-spot.cfg"
 		"MOUSE3"		"+radialradio"
 		"MOUSE4"		"+voicerecord"
-		"i"		"show_loadout_toggle"
+		"i"		"exec wifi-socd"
 		"["		"say_team <<<"
 		"="		"say_team Save"
 		"f"		"+lookatweapon"
