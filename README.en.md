@@ -11,7 +11,7 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 ### Wi-Fi SOCD
 
-The supplied key configuration initially uses standard `W` / `A` / `S` / `D` movement; subsequent launches retain the last saved SOCD choice. Pressing `I` or running `exec wifi-socd` in the console enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
+The supplied key configuration is saved with SOCD enabled: `W` / `A` / `S` / `D` use SOCD movement, and the first `I` press executes the off file. Subsequent launches retain the last saved choice. Press `I` to alternate between enabling and disabling SOCD, or run `exec wifi-socd` in the console to enable it directly. `wifi-socd.cfg` enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
 
 Once enabled, for example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
 
@@ -19,7 +19,7 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 
 | Key | Action |
 | --- | --- |
-| `W` / `A` / `S` / `D` | Standard movement initially; subsequently retain the last saved SOCD choice |
+| `W` / `A` / `S` / `D` | SOCD movement in the supplied key configuration; subsequently retain the last saved choice |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
 | `I` | Toggle SOCD, replacing the previous loadout display toggle; retain the saved choice |
 | `O` | Cycle through three crosshair presets; all follow recoil |
@@ -82,7 +82,7 @@ Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 â†’ 3 â
 
 | Preset | Style and color | Length / thickness / gap (pixels) | Opacity / outline |
 | --- | --- | --- | --- |
-| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 31 / 999` | `180` / full outline |
+| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 31 / 128` | `180` / full outline |
 | `wifi-crosshair2.cfg` | Dynamic Quad, white, currently fully transparent | `120 / 31 / 128` | `0` / no outline |
 | `wifi-crosshair3.cfg` | White dot | `0 / 4 / 0` | `255` / full outline |
 
