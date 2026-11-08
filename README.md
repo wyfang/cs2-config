@@ -11,17 +11,17 @@
 
 ### Wi-Fi SOCD
 
-仓库随附的按键配置当前保存为 SOCD 关闭状态，`W` / `A` / `S` / `D` 使用普通移动，首次按 `I` 执行开启；之后沿用上一次保存的开关状态。按 `I` 可交替开启和关闭，在控制台执行 `exec wifi-socd` 则直接开启。`wifi-socd.cfg` 为 `A` / `D`（左右）和 `W` / `S`（前后）启用“最后输入优先”的移动逻辑，两组方向独立处理。SOCD 使用独立文件开关，重载主配置不会改变其开关选择。
+仓库随附的按键配置当前保存为 SOCD 关闭状态。完整按下并松开一次 `I`，按 `ON → RESET → OFF → RESET → ON` 循环前进一阶段；因此当前首次按 `I` 进入 RESET，第二次开启 SOCD。RESET 阶段暂停 WASD，团队消息分别为 `SOCD-ON`、`SOCD-RESET`、`SOCD-OFF`。
 
-启用后，例如按住 `A` 后再按 `D`，脚本将方向切换为向右；松开 `D` 时，如果 `A` 仍按住，则恢复向左；两键都松开后，停止该方向轴的输入。`W` / `S` 使用相同逻辑。
+ON 为 `A` / `D` 与 `W` / `S` 提供“最后输入优先”，两组方向独立处理。例如按住 `A` 后再按 `D`，方向切换为向右；松开 `D` 时，若 `A` 仍按住，则恢复向左。OFF 使用相反方向键互相抵消的普通移动逻辑。两种模式共用 `forwardback` / `rightleft` 输入路径。主配置重载保留已保存的模式或 RESET 阶段。
 
 ### 主要按键
 
 | 按键 | 功能 |
 | --- | --- |
-| `W` / `A` / `S` / `D` | 当前随附配置为普通 WASD；按 `I` 可启用 SOCD，并保存选择 |
+| `W` / `A` / `S` / `D` | ON：最后输入优先；OFF：相反方向抵消；RESET：暂停移动输入 |
 | `/` / `Mouse4` | 麦克风常开切换 / 按住说话 |
-| `I` | 切换 SOCD，发送 `SOCD-ON` / `SOCD-OFF` 团队消息并保存所选状态 |
+| `I` | 每次完整按下、松开前进一阶段：ON → RESET → OFF → RESET → ON；发送对应团队消息并保存 |
 | `O` | 循环切换三套准星，均跟随后坐力 |
 | `P` | 重新加载 `autoexec.cfg`，恢复启动时的视角、准星与 HUD 配色，保留当前 SOCD 状态 |
 | `Mouse5` | 切换两套持枪视角，同时切换对应准星与 HUD 配色 |
@@ -48,25 +48,39 @@
 
 ### SOCD 配置
 
-`autoexec.cfg` 加载 `wifi-socd-core.cfg` 准备运行所需的命令定义，但不覆盖 WASD 或 `I` 绑定。按 `I` 可交替开启和关闭 SOCD，替换原来的 `show_loadout_toggle`（装备显示切换）。也可在控制台直接开启：
+`autoexec.cfg` 加载 `wifi-socd-core.cfg`，准备两种移动模式与 I 键阶段处理，不覆盖保存的 WASD 或 `I` 绑定。`I` 替代原来的 `show_loadout_toggle`（装备显示切换）。更新时必须一起复制主配置及全部六份 SOCD 文件：
+
+| 文件 | 用途 |
+| --- | --- |
+| `autoexec.cfg` | 启动时加载核心定义，保留保存的绑定 |
+| `wifi-socd-core.cfg` | 定义最后输入优先、普通方向抵消、RESET 空操作及 I 键按下/松开处理 |
+| `wifi-socd.cfg` | 进入 ON，绑定 `+wifi-*`，发送 `SOCD-ON` |
+| `wifi-socd-off.cfg` | 进入 OFF，绑定 `+wifi-normal-*`，发送 `SOCD-OFF` |
+| `wifi-socd-reset-to-off.cfg` | ON → RESET 的按下处理，下一阶段为 OFF |
+| `wifi-socd-reset-to-on.cfg` | OFF → RESET 的按下处理，下一阶段为 ON |
+| `wifi-socd-reset.cfg` | 仅供控制台完整清理移动输入，结束于 OFF |
+
+ON/OFF 中按下 `I`，对应 reset-to 文件只执行一次 `forwardback 0 0 0`，并将 WASD 绑定为空操作；松开同一次 `I` 时，只执行一次 `rightleft 0 0 0`，再将 I 绑定到对应的 RESET 后续处理、保存配置并发送 `SOCD-RESET`。RESET 中下一次完整按下、松开 `I`，在松开时进入 OFF 或 ON。因此每个 I 按下/松开事件最多发送一条移动轴命令，且只在松开时重绑 I，保持按下与释放处理配对。
+
+RESET 阶段 WASD 暂停是预期行为。此循环不使用 `exec_async`，也不会取消 I 绑定。ON/OFF 都通过相同的模拟轴输入处理移动，避免切换时混用数字按钮与模拟轴。核心定义将 `joy_side_sensitivity` 与 `joy_forward_sensitivity` 设为 `1`。
+
+首次安装、旧绑定未更新或需要清理残留移动输入时，先松开 WASD，在控制台执行：
 
 ```text
-exec wifi-socd
+exec wifi-socd-reset
 ```
 
-启用后会覆盖 `W` / `A` / `S` / `D` 的绑定，保存配置后发送 `SOCD-ON` 团队消息并打印 `Wi-Fi SOCD ON!!` 图案。核心定义文件会将 `joy_side_sensitivity` 和 `joy_forward_sensitivity` 设为 `1`。配置用于个人测试与研究，实际效果以当前游戏版本和服务器行为为准。
-
-关闭 SOCD 时执行：
+该控制台恢复脚本清理数字移动按钮与两个模拟轴，最后恢复 OFF 和有效的 I 绑定。不要将它直接绑定到 I，因为它包含多条移动命令。需要恢复后立即开启时，在控制台执行：
 
 ```text
-exec wifi-socd-off
+exec wifi-socd-reset; exec wifi-socd
 ```
 
-关闭文件恢复普通 WASD，保存配置后发送 `SOCD-OFF` 团队消息并打印 `Wi-Fi SOCD OFF!!` 图案，不修改视角、准星或 HUD 配色。开启文件将 `I` 绑定为 `exec wifi-socd-off`，关闭文件将其绑定为 `exec wifi-socd`。两个开关文件都会执行 `host_writeconfig` 保存当前游戏配置（包含 WASD 和 `I` 绑定）；下次启动时，主配置重新准备 SOCD 命令定义，并沿用保存的绑定，从而恢复上一次选择。用户按键配置必须可写；重新覆盖 `userdata` 或云同步覆盖本地配置也可能改变保存的选择。
+也可在松开 WASD 且输入状态正常时，用 `exec wifi-socd` / `exec wifi-socd-off` 直接选择模式；这两个文件本身不执行完整输入恢复。ON/OFF 和进入 RESET 时均执行 `host_writeconfig`，保存当前配置及 WASD/I 绑定；下次启动时重新加载核心定义，沿用保存的模式或 RESET 阶段。用户按键配置必须可写；覆盖 `userdata` 或云同步覆盖本地文件可能改变保存的状态。
 
-执行 `exec autoexec` 或按 `P` 会重载主配置，但不改变 SOCD 的开关选择。启用、停用或重载前应松开所有移动键。开关文件只重绑按键，不再连续发送多条移动清零命令，以避免同一次按键事件中的多输入冲突。
+执行 `exec autoexec` 或按 `P` 保留当前绑定阶段；重载前应松开所有移动键。不需要强制加载模式的 Steam 启动选项；移除旧的 `+exec wifi-socd` / `+exec wifi-socd-off`，以免覆盖保存的选择。只更新游戏 CFG 而未复制账号按键配置时，执行一次上述控制台恢复命令，安装当前 I 循环。
 
-不需要在 Steam 启动选项中强制执行开关文件；若之前添加过 `+exec wifi-socd-off` 或 `+exec wifi-socd`，应移除以免覆盖保存的选择。如果只更新游戏 CFG、没有复制随附的账号按键配置，先执行一次 `exec wifi-socd` 或 `exec wifi-socd-off`，选择当前状态并建立 `I` 键绑定。更新游戏配置时应同时复制 `autoexec.cfg`、`wifi-socd-core.cfg`、`wifi-socd.cfg` 与 `wifi-socd-off.cfg`。
+当前版本已在本地游戏完成两轮循环，并测试了按住 W 或 S 时按 I。此验证不覆盖所有游戏版本和服务器环境；实际行为以当前环境为准。
 
 ### 音量与麦克风自听
 

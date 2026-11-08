@@ -11,17 +11,17 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 ### Wi-Fi SOCD
 
-The supplied key configuration is currently saved with SOCD disabled: `W` / `A` / `S` / `D` use standard movement, and the first `I` press executes the on file. Subsequent launches retain the last saved choice. Press `I` to alternate between enabling and disabling SOCD, or run `exec wifi-socd` in the console to enable it directly. `wifi-socd.cfg` enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
+The supplied key configuration is saved with SOCD OFF. Each complete press and release of `I` advances one stage in `ON → RESET → OFF → RESET → ON`. From the supplied OFF state, the first press enters RESET and the second enables SOCD. RESET pauses WASD. Team messages report `SOCD-ON`, `SOCD-RESET`, or `SOCD-OFF`.
 
-Once enabled, for example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
+ON applies last input priority independently to `A` / `D` and `W` / `S`. For example, holding `A` and then pressing `D` switches right; releasing `D` while still holding `A` restores left. OFF uses ordinary opposing-key cancellation. Both modes share the `forwardback` / `rightleft` input path. Reloading the main configuration retains the saved mode or RESET stage.
 
 ### Key bindings
 
 | Key | Action |
 | --- | --- |
-| `W` / `A` / `S` / `D` | Standard WASD in the current supplied configuration; press `I` to enable SOCD and save the choice |
+| `W` / `A` / `S` / `D` | ON: last input priority; OFF: opposing keys cancel; RESET: movement input paused |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
-| `I` | Toggle SOCD, send `SOCD-ON` / `SOCD-OFF` to team chat, and save the choice |
+| `I` | Each complete press/release advances ON → RESET → OFF → RESET → ON, sends the corresponding team message, and saves |
 | `O` | Cycle through three crosshair presets; all follow recoil |
 | `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color while preserving the current SOCD state |
 | `Mouse5` | Switch between two viewmodels with their matching crosshair and HUD color |
@@ -48,25 +48,39 @@ Main locations:
 
 ### SOCD configuration
 
-`autoexec.cfg` loads the runtime command definitions in `wifi-socd-core.cfg` without overwriting WASD or `I` bindings. Press `I` to alternate between enabling and disabling SOCD, replacing `show_loadout_toggle` (the loadout display toggle). You can also enable it directly in the console:
+`autoexec.cfg` loads `wifi-socd-core.cfg`, defining both movement modes and the I-key phase handlers without overwriting saved WASD or `I` bindings. `I` replaces `show_loadout_toggle` (the loadout display toggle). Copy the main configuration and all six SOCD files together when updating:
+
+| File | Purpose |
+| --- | --- |
+| `autoexec.cfg` | Load core definitions at startup while preserving saved bindings |
+| `wifi-socd-core.cfg` | Define last input priority, ordinary opposing-key cancellation, the RESET no-op, and I-key down/up handlers |
+| `wifi-socd.cfg` | Enter ON, bind `+wifi-*`, and send `SOCD-ON` |
+| `wifi-socd-off.cfg` | Enter OFF, bind `+wifi-normal-*`, and send `SOCD-OFF` |
+| `wifi-socd-reset-to-off.cfg` | Handle ON → RESET key-down; the following stage is OFF |
+| `wifi-socd-reset-to-on.cfg` | Handle OFF → RESET key-down; the following stage is ON |
+| `wifi-socd-reset.cfg` | Console-only full movement recovery, ending in OFF |
+
+Pressing `I` in ON/OFF executes the matching reset-to file: it issues only `forwardback 0 0 0` and binds WASD to a no-op. Releasing that same I press issues only `rightleft 0 0 0`, then selects the corresponding RESET continuation, saves the configuration, and sends `SOCD-RESET`. The next complete I press/release enters OFF or ON on release. Each I down/up event therefore issues at most one movement-axis command. I is rebound only on release so its down/up handlers remain paired.
+
+WASD being paused during RESET is intentional. The cycle does not use `exec_async` or unbind I. ON and OFF use the same analog axes, avoiding mixed digital-button and analog-axis movement state across switches. The core definitions set `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`.
+
+For first-time installation, outdated bindings, or recovery from residual movement input, release WASD and run this in the console:
 
 ```text
-exec wifi-socd
+exec wifi-socd-reset
 ```
 
-Enabling it replaces the `W` / `A` / `S` / `D` bindings, saves the configuration, sends `SOCD-ON` to team chat, and prints the `Wi-Fi SOCD ON!!` banner. The core definitions file sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
-
-To disable SOCD, run:
+This console recovery script clears digital movement buttons and both analog axes, then restores OFF and a working I binding. Do not bind it directly to I: it contains multiple movement commands. To recover and immediately enable SOCD, run in the console:
 
 ```text
-exec wifi-socd-off
+exec wifi-socd-reset; exec wifi-socd
 ```
 
-The off file restores standard WASD, saves the configuration, sends `SOCD-OFF` to team chat, and prints the `Wi-Fi SOCD OFF!!` banner without changing the viewmodel, crosshair, or HUD color. The on file binds `I` to `exec wifi-socd-off`; the off file binds it to `exec wifi-socd`. Both switch files run `host_writeconfig` to save the current game configuration, including WASD and `I` bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
+With WASD released and input state normal, `exec wifi-socd` / `exec wifi-socd-off` can also select a mode directly; these two files do not perform full input recovery. ON/OFF and entry into RESET run `host_writeconfig` to save current settings and WASD/I bindings. On the next launch, core definitions are loaded again and the saved mode or RESET stage is retained. User key configuration files must be writable; replacing `userdata` or cloud synchronization overwriting local files can change the saved state.
 
-Running `exec autoexec` or pressing `P` reloads the main configuration without changing whether SOCD is enabled. Release all movement keys before enabling, disabling, or reloading. The switch files only rebind keys; they no longer issue several movement reset commands in one input event, avoiding conflicts with the multi-input restriction.
+Running `exec autoexec` or pressing `P` preserves the current binding stage; release movement keys before reloading. No launch option is needed to force a mode. Remove old `+exec wifi-socd` / `+exec wifi-socd-off` options so they do not override the saved choice. If updating game CFG files without copying the supplied account bindings, run the console recovery command once to install the current I cycle.
 
-No launch option is needed to force either switch file. Remove any previously added `+exec wifi-socd-off` or `+exec wifi-socd` so it does not override the saved choice. If you update only the game CFG files without copying the supplied account key configuration, run `exec wifi-socd` or `exec wifi-socd-off` once to select the current state and establish the `I` binding. Copy `autoexec.cfg`, `wifi-socd-core.cfg`, `wifi-socd.cfg`, and `wifi-socd-off.cfg` together when updating the game configuration.
+This version completed two cycles in the local game, including tests with W or S held while pressing I. That validation does not cover every game version or server environment; actual behavior depends on the current environment.
 
 ### Volume and microphone self-monitoring
 
