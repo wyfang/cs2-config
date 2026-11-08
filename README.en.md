@@ -21,13 +21,13 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 | --- | --- |
 | `W` / `A` / `S` / `D` | SOCD movement in the supplied key configuration; subsequently retain the last saved choice |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
-| `I` | Toggle SOCD, replacing the previous loadout display toggle; retain the saved choice |
+| `I` | Toggle SOCD, send `SOCD-ON` / `SOCD-OFF` to team chat, and save the choice |
 | `O` | Cycle through three crosshair presets; all follow recoil |
 | `P` | Reload `autoexec.cfg` and restore the startup viewmodel, crosshair, and HUD color while preserving the current SOCD state |
 | `Mouse5` | Switch between two viewmodels with their matching crosshair and HUD color |
 | `V` | Mark a position and send warnings in Chinese and English |
-| `\` | Toggle master volume between 10% and 100% |
-| `.` | Toggle `voice_loopback` |
+| `\` | Set master volume to 10% / 100% and send `VOLUME-10%` / `VOLUME-100%` to team chat |
+| `.` | Toggle microphone self-monitoring and send `MIC-LOOPBACK-ON` / `MIC-LOOPBACK-OFF` to team chat |
 | `Caps Lock` | Switch the weapon between left and right hands |
 | `F5`–`F7` | Cycle preset chat messages |
 | `F8` | Send the preset message explaining an unsuccessful commendation |
@@ -54,7 +54,7 @@ Main locations:
 exec wifi-socd
 ```
 
-Enabling it replaces the `W` / `A` / `S` / `D` bindings and prints the `Wi-Fi SOCD ON!!` banner after saving the configuration. The core definitions file sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
+Enabling it replaces the `W` / `A` / `S` / `D` bindings, saves the configuration, sends `SOCD-ON` to team chat, and prints the `Wi-Fi SOCD ON!!` banner. The core definitions file sets `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`. This configuration is intended for personal testing and research; actual behavior depends on the current game version and server.
 
 To disable SOCD, run:
 
@@ -62,11 +62,23 @@ To disable SOCD, run:
 exec wifi-socd-off
 ```
 
-The off file clears directional input, restores standard WASD, and prints the `Wi-Fi SOCD OFF!!` banner after saving the configuration, without changing the viewmodel, crosshair, or HUD color. The on file binds `I` to `exec wifi-socd-off`; the off file binds it to `exec wifi-socd`. Both switch files run `host_writeconfig` to save the current game configuration, including WASD and `I` bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
+The off file restores standard WASD, saves the configuration, sends `SOCD-OFF` to team chat, and prints the `Wi-Fi SOCD OFF!!` banner without changing the viewmodel, crosshair, or HUD color. The on file binds `I` to `exec wifi-socd-off`; the off file binds it to `exec wifi-socd`. Both switch files run `host_writeconfig` to save the current game configuration, including WASD and `I` bindings. On the next launch, the main configuration prepares the SOCD command definitions again and retains the saved bindings, restoring the previous choice. The user key configuration must be writable; replacing `userdata` or a cloud sync that overwrites local configuration can also change the saved choice.
 
-Running `exec autoexec` or pressing `P` reloads the main configuration without changing whether SOCD is enabled. Because the script's key handling commands are reinitialized, release all movement keys before enabling, disabling, or reloading.
+Running `exec autoexec` or pressing `P` reloads the main configuration without changing whether SOCD is enabled. Release all movement keys before enabling, disabling, or reloading. The switch files only rebind keys; they no longer issue several movement reset commands in one input event, avoiding conflicts with the multi-input restriction.
 
 No launch option is needed to force either switch file. Remove any previously added `+exec wifi-socd-off` or `+exec wifi-socd` so it does not override the saved choice. If you update only the game CFG files without copying the supplied account key configuration, run `exec wifi-socd` or `exec wifi-socd-off` once to select the current state and establish the `I` binding. Copy `autoexec.cfg`, `wifi-socd-core.cfg`, `wifi-socd.cfg`, and `wifi-socd-off.cfg` together when updating the game configuration.
+
+### Volume and microphone self-monitoring
+
+`\` runs `wifi-volume-low.cfg` / `wifi-volume-high.cfg`, setting master volume to `0.1` / `1` and sending `VOLUME-10%` / `VOLUME-100%` to team chat. `.` runs `wifi-loopback-on.cfg` / `wifi-loopback-off.cfg`, setting `voice_loopback` to `1` / `0` and sending `MIC-LOOPBACK-ON` / `MIC-LOOPBACK-OFF`. Self-monitoring lets you hear your own microphone; it does not enable or disable speaking to teammates.
+
+Each state file rebinds its key to the opposite state and runs `host_writeconfig`. Copy all five audio files: `wifi-audio-keys.cfg`, `wifi-volume-*.cfg`, and `wifi-loopback-*.cfg`. If you update only the game scripts, or the running game still has the old bindings in memory, run this once:
+
+```text
+exec wifi-audio-keys
+```
+
+The installer sets the next `\` / `.` target to low volume / self-monitoring on without changing current audio values. Normal switching saves the next target, so do not reinstall on every main configuration reload. Team messages report the value explicitly set by the script; changing audio values elsewhere does not change the next bound target.
 
 ### Video settings on a new computer
 
@@ -82,13 +94,13 @@ Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 → 3 �
 
 | Preset | Style and color | Length / thickness / gap (pixels) | Opacity / outline |
 | --- | --- | --- | --- |
-| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 31 / 128` | `180` / full outline |
-| `wifi-crosshair2.cfg` | Dynamic Quad, white, currently fully transparent | `120 / 31 / 128` | `0` / no outline |
+| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 32 / 128` | `180` / full outline |
+| `wifi-crosshair2.cfg` | Dynamic Cross, black (RGB `0/0/0`) | `120 / 32 / 9999` | `255` / full outline |
 | `wifi-crosshair3.cfg` | White dot | `0 / 4 / 0` | `255` / full outline |
 
 For `Mouse5`, mode 1 loads crosshair 1 and HUD color `11`; mode 2 loads crosshair 2 and HUD color `0`. Each mode sets the next `O` press to the following preset. `P` reloads the main configuration and restores mode 1.
 
-To update, copy all three `wifi-crosshair*.cfg` files together with the main configuration and SOCD files listed above into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. Some comments in the original files no longer match their values; the table reflects the actual configuration. Crosshair 2 retains opacity `0` from the latest backup.
+To update, copy all three `wifi-crosshair*.cfg` files together with the main configuration and SOCD files listed above into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. The table reflects the files in this update. Crosshair 2 currently uses style `3`, opacity `255`, and a full outline.
 
 ### Windows scripts
 

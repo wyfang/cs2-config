@@ -21,13 +21,13 @@
 | --- | --- |
 | `W` / `A` / `S` / `D` | 随附按键配置为 SOCD 移动，此后沿用上次保存的开关状态 |
 | `/` / `Mouse4` | 麦克风常开切换 / 按住说话 |
-| `I` | 切换 SOCD 开关，替换原来的装备显示切换功能；保存后沿用所选状态 |
+| `I` | 切换 SOCD，发送 `SOCD-ON` / `SOCD-OFF` 团队消息并保存所选状态 |
 | `O` | 循环切换三套准星，均跟随后坐力 |
 | `P` | 重新加载 `autoexec.cfg`，恢复启动时的视角、准星与 HUD 配色，保留当前 SOCD 状态 |
 | `Mouse5` | 切换两套持枪视角，同时切换对应准星与 HUD 配色 |
 | `V` | 标记位置并发送中英文警告 |
-| `\` | 在 10% 与 100% 主音量之间切换 |
-| `.` | 切换 `voice_loopback` |
+| `\` | 切换 10% / 100% 主音量，发送 `VOLUME-10%` / `VOLUME-100%` 团队消息 |
+| `.` | 切换麦克风自听，发送 `MIC-LOOPBACK-ON` / `MIC-LOOPBACK-OFF` 团队消息 |
 | `Caps Lock` | 切换左右手持枪 |
 | `F5`–`F7` | 循环发送预设聊天内容 |
 | `F8` | 发送预设的点赞未完成说明 |
@@ -54,7 +54,7 @@
 exec wifi-socd
 ```
 
-启用后会覆盖 `W` / `A` / `S` / `D` 的绑定，并在保存配置后打印 `Wi-Fi SOCD ON!!` 图案。核心定义文件会将 `joy_side_sensitivity` 和 `joy_forward_sensitivity` 设为 `1`。配置用于个人测试与研究，实际效果以当前游戏版本和服务器行为为准。
+启用后会覆盖 `W` / `A` / `S` / `D` 的绑定，保存配置后发送 `SOCD-ON` 团队消息并打印 `Wi-Fi SOCD ON!!` 图案。核心定义文件会将 `joy_side_sensitivity` 和 `joy_forward_sensitivity` 设为 `1`。配置用于个人测试与研究，实际效果以当前游戏版本和服务器行为为准。
 
 关闭 SOCD 时执行：
 
@@ -62,11 +62,23 @@ exec wifi-socd
 exec wifi-socd-off
 ```
 
-关闭文件清零方向输入并恢复普通 WASD，保存配置后打印 `Wi-Fi SOCD OFF!!` 图案，不修改视角、准星或 HUD 配色。开启文件将 `I` 绑定为 `exec wifi-socd-off`，关闭文件将其绑定为 `exec wifi-socd`。两个开关文件都会执行 `host_writeconfig` 保存当前游戏配置（包含 WASD 和 `I` 绑定）；下次启动时，主配置重新准备 SOCD 命令定义，并沿用保存的绑定，从而恢复上一次选择。用户按键配置必须可写；重新覆盖 `userdata` 或云同步覆盖本地配置也可能改变保存的选择。
+关闭文件恢复普通 WASD，保存配置后发送 `SOCD-OFF` 团队消息并打印 `Wi-Fi SOCD OFF!!` 图案，不修改视角、准星或 HUD 配色。开启文件将 `I` 绑定为 `exec wifi-socd-off`，关闭文件将其绑定为 `exec wifi-socd`。两个开关文件都会执行 `host_writeconfig` 保存当前游戏配置（包含 WASD 和 `I` 绑定）；下次启动时，主配置重新准备 SOCD 命令定义，并沿用保存的绑定，从而恢复上一次选择。用户按键配置必须可写；重新覆盖 `userdata` 或云同步覆盖本地配置也可能改变保存的选择。
 
-执行 `exec autoexec` 或按 `P` 会重载主配置，但不改变 SOCD 的开关选择。由于脚本的按键处理命令会重新初始化，启用、停用或重载前应松开所有移动键。
+执行 `exec autoexec` 或按 `P` 会重载主配置，但不改变 SOCD 的开关选择。启用、停用或重载前应松开所有移动键。开关文件只重绑按键，不再连续发送多条移动清零命令，以避免同一次按键事件中的多输入冲突。
 
 不需要在 Steam 启动选项中强制执行开关文件；若之前添加过 `+exec wifi-socd-off` 或 `+exec wifi-socd`，应移除以免覆盖保存的选择。如果只更新游戏 CFG、没有复制随附的账号按键配置，先执行一次 `exec wifi-socd` 或 `exec wifi-socd-off`，选择当前状态并建立 `I` 键绑定。更新游戏配置时应同时复制 `autoexec.cfg`、`wifi-socd-core.cfg`、`wifi-socd.cfg` 与 `wifi-socd-off.cfg`。
+
+### 音量与麦克风自听
+
+`\` 使用 `wifi-volume-low.cfg` / `wifi-volume-high.cfg`，分别把主音量设为 `0.1` / `1`，发送 `VOLUME-10%` / `VOLUME-100%` 团队消息。`.` 使用 `wifi-loopback-on.cfg` / `wifi-loopback-off.cfg`，分别把 `voice_loopback` 设为 `1` / `0`，发送 `MIC-LOOPBACK-ON` / `MIC-LOOPBACK-OFF`。自听指听到自己的麦克风声音，不影响向队友发言。
+
+每份状态脚本都会将对应按键改绑为另一状态并执行 `host_writeconfig`。同时复制五份 `wifi-audio-keys.cfg`、`wifi-volume-*.cfg` 与 `wifi-loopback-*.cfg`；如果只更新游戏脚本，或游戏仍使用内存中的旧绑定，在控制台执行一次：
+
+```text
+exec wifi-audio-keys
+```
+
+安装命令仅将下一次 `\` / `.` 的目标设为低音量 / 自听开启，不改动当前音频值。正常切换后由按键保存下一目标，无需每次重载主配置时重新安装。团队消息报告脚本本次明确设置的值；通过其他方式改动音频值后，下一次按键仍会设为绑定对应的目标值。
 
 ### 画质与新电脑迁移
 
@@ -82,13 +94,13 @@ exec wifi-socd-off
 
 | 预设 | 样式与颜色 | 长度 / 粗细 / 间距（像素） | 不透明度 / 描边 |
 | --- | --- | --- | --- |
-| `wifi-crosshair1.cfg` | Dynamic Quad，黄色（RGB `255/225/0`） | `120 / 31 / 128` | `180` / 完整描边 |
-| `wifi-crosshair2.cfg` | Dynamic Quad，白色，当前完全透明 | `120 / 31 / 128` | `0` / 无描边 |
+| `wifi-crosshair1.cfg` | Dynamic Quad，黄色（RGB `255/225/0`） | `120 / 32 / 128` | `180` / 完整描边 |
+| `wifi-crosshair2.cfg` | Dynamic Cross，黑色（RGB `0/0/0`） | `120 / 32 / 9999` | `255` / 完整描边 |
 | `wifi-crosshair3.cfg` | 白色中心点 | `0 / 4 / 0` | `255` / 完整描边 |
 
 `Mouse5` 的模式 1 加载准星 1 与 HUD 配色 `11`，模式 2 加载准星 2 与 HUD 配色 `0`，并将下一次 `O` 切换设为后续预设。`P` 会重新加载主配置并恢复模式 1。
 
-更新时，将三个 `wifi-crosshair*.cfg` 与上节列出的主配置及 SOCD 配套文件一并同步到游戏的 `game/csgo/cfg`，在控制台执行 `exec autoexec` 重新加载绑定。尺寸在加载时按当前分辨率的像素值设置；之后更改分辨率，游戏会自动按比例缩放，再次加载预设则重新应用文件中的像素值。原始文件的部分注释尚未与数值一致，以上表格按实际配置整理；准星 2 的不透明度 `0` 保留自最新备份。
+更新时，将三个 `wifi-crosshair*.cfg` 与上节列出的主配置及 SOCD 配套文件一并同步到游戏的 `game/csgo/cfg`，在控制台执行 `exec autoexec` 重新加载绑定。尺寸在加载时按当前分辨率的像素值设置；之后更改分辨率，游戏会自动按比例缩放，再次加载预设则重新应用文件中的像素值。以上表格按本次同步的文件参数整理；准星 2 当前使用样式 `3`、不透明度 `255` 和完整描边。
 
 ### Windows 脚本
 
