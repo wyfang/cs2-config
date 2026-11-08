@@ -11,7 +11,7 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 ### Wi-Fi SOCD
 
-The supplied key configuration is saved with SOCD enabled: `W` / `A` / `S` / `D` use SOCD movement, and the first `I` press executes the off file. Subsequent launches retain the last saved choice. Press `I` to alternate between enabling and disabling SOCD, or run `exec wifi-socd` in the console to enable it directly. `wifi-socd.cfg` enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
+The supplied key configuration is currently saved with SOCD disabled: `W` / `A` / `S` / `D` use standard movement, and the first `I` press executes the on file. Subsequent launches retain the last saved choice. Press `I` to alternate between enabling and disabling SOCD, or run `exec wifi-socd` in the console to enable it directly. `wifi-socd.cfg` enables last input priority for `A` / `D` (left and right) and `W` / `S` (forward and backward), handling the two axes independently. Separate files enable and disable SOCD; reloading the main configuration preserves the enabled or disabled choice.
 
 Once enabled, for example, holding `A` and then pressing `D` switches the configured direction to the right. Releasing `D` while still holding `A` restores the leftward input; releasing both keys stops input on that axis. `W` / `S` follows the same logic.
 
@@ -19,7 +19,7 @@ Once enabled, for example, holding `A` and then pressing `D` switches the config
 
 | Key | Action |
 | --- | --- |
-| `W` / `A` / `S` / `D` | SOCD movement in the supplied key configuration; subsequently retain the last saved choice |
+| `W` / `A` / `S` / `D` | Standard WASD in the current supplied configuration; press `I` to enable SOCD and save the choice |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
 | `I` | Toggle SOCD, send `SOCD-ON` / `SOCD-OFF` to team chat, and save the choice |
 | `O` | Cycle through three crosshair presets; all follow recoil |
@@ -90,17 +90,30 @@ Do not force the old GPU identifiers as universal values across computers. Let t
 
 ### O-key crosshairs
 
-Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 → 3 → 1`. All three presets follow recoil and use the new pixel commands. Their current values are:
+Startup loads `wifi-crosshair1.cfg`; pressing `O` then cycles through `2 → 3 → 1`. All three presets follow recoil and use pixel parameters that scale with resolution:
 
-| Preset | Style and color | Length / thickness / gap (pixels) | Opacity / outline |
+| Preset | Style and color | Length / thickness / gap (file values) | Opacity / outline |
 | --- | --- | --- | --- |
-| `wifi-crosshair1.cfg` | Dynamic Quad, yellow (RGB `255/225/0`) | `120 / 32 / 128` | `180` / full outline |
-| `wifi-crosshair2.cfg` | Dynamic Cross, black (RGB `0/0/0`) | `120 / 32 / 9999` | `255` / full outline |
-| `wifi-crosshair3.cfg` | White dot | `0 / 4 / 0` | `255` / full outline |
+| `wifi-crosshair1.cfg` | Dynamic Cross (Legacy), style `2`, orange RGB `255/150/0` | `110 / 32 / 128` | `255` / Full Outline |
+| `wifi-crosshair2.cfg` | Static Circle, style `3`, white RGB `255/255/255` | `120 / 32 / 9999` | `255` / Full Outline |
+| `wifi-crosshair3.cfg` | White dot (style `4` with zero bar length) | `0 / 4 / 0` | `255` / Full Outline |
 
-For `Mouse5`, mode 1 loads crosshair 1 and HUD color `11`; mode 2 loads crosshair 2 and HUD color `0`. Each mode sets the next `O` press to the following preset. `P` reloads the main configuration and restores mode 1.
+Preset 1 uses legacy dynamic splitting with threshold `10`, outer-bar length ratio `0.9`, and inner/outer alpha multipliers of `1`; its outline is opaque black. Only preset 1 contains concise technical comments and confirmed ranges; presets 2 and 3 contain commands only. Preset 2 uses Static Circle (style `3`), so bar length and legacy split parameters do not control its circle appearance. Its gap input `9999` is preserved; the effective value depends on the engine's accepted range. Presets 2 and 3 inherit the current outline RGBA because they do not explicitly set it.
 
-To update, copy all three `wifi-crosshair*.cfg` files together with the main configuration and SOCD files listed above into the game's `game/csgo/cfg`, then run `exec autoexec` in the console to reload the bindings. Sizes are applied as pixels at the current resolution when a preset loads. The game scales them proportionally after a resolution change; loading a preset again reapplies its configured pixel values. The table reflects the files in this update. Crosshair 2 currently uses style `3`, opacity `255`, and a full outline.
+Each preset also explicitly sets the same 15 additional options:
+
+| Group | Current values |
+| --- | --- |
+| Scope dot | Do not use crosshair color; scale `1` |
+| Observed crosshairs | Show everyone's crosshair; use your own when the bot can be taken over |
+| Grenade line-up reticles | Flash, HE, fire, smoke, and decoy disabled; retain regular crosshair enabled |
+| Grenade reticle delays | `1` second after pulling the pin for all five types |
+
+These are global client variables. Writing identical values in every preset keeps these preferences consistent when switching.
+
+For `Mouse5`, mode 1 loads crosshair 1 and HUD color `11`; mode 2 loads crosshair 2 and HUD color `0`. Each mode sets the next `O` press to the following preset. Pressing `P` reloads the main configuration and restores mode 1.
+
+To update, copy all three `wifi-crosshair*.cfg` files together with the main configuration and SOCD files into the game's `game/csgo/cfg`, then run `exec autoexec` to reload the bindings. You can also load a preset directly with `exec wifi-crosshair1`, `exec wifi-crosshair2`, or `exec wifi-crosshair3`. Resolution changes scale the existing sizes; reloading a preset reapplies its pixel values at the current resolution.
 
 ### Windows scripts
 
