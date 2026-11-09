@@ -13,13 +13,13 @@
 
 仓库随附的按键配置当前保存为 SOCD 关闭状态。完整按下并松开一次 `I`，按 `ON → RESET → OFF → RESET → ON` 循环前进一阶段；因此当前首次按 `I` 进入 RESET，第二次开启 SOCD。RESET 阶段暂停 WASD，团队消息分别为 `SOCD-ON`、`SOCD-RESET`、`SOCD-OFF`。
 
-ON 为 `A` / `D` 与 `W` / `S` 提供“最后输入优先”，两组方向独立处理。例如按住 `A` 后再按 `D`，方向切换为向右；松开 `D` 时，若 `A` 仍按住，则恢复向左。OFF 使用相反方向键互相抵消的普通移动逻辑。两种模式共用 `forwardback` / `rightleft` 输入路径。主配置重载保留已保存的模式或 RESET 阶段。
+ON 为 `A` / `D` 与 `W` / `S` 提供“最后输入优先”，两组方向独立处理。例如按住 `A` 后再按 `D`，方向切换为向右；松开 `D` 时，若 `A` 仍按住，则恢复向左。OFF 直接使用原生 `+forward` / `+back` / `+left` / `+right`，相反方向键互相抵消，并恢复原生计分板交互下的移动。切换前必须完全松开 WASD。主配置重载保留已保存的模式或 RESET 阶段。
 
 ### 主要按键
 
 | 按键 | 功能 |
 | --- | --- |
-| `W` / `A` / `S` / `D` | ON：最后输入优先；OFF：相反方向抵消；RESET：暂停移动输入 |
+| `W` / `A` / `S` / `D` | ON：最后输入优先；OFF：原生移动；RESET：暂停移动输入 |
 | `/` / `Mouse4` | 麦克风常开切换 / 按住说话 |
 | `I` | 每次完整按下、松开前进一阶段：ON → RESET → OFF → RESET → ON；发送对应团队消息并保存 |
 | `O` | 循环切换三套准星，均跟随后坐力 |
@@ -48,21 +48,21 @@ ON 为 `A` / `D` 与 `W` / `S` 提供“最后输入优先”，两组方向独�
 
 ### SOCD 配置
 
-`autoexec.cfg` 加载 `wifi-socd-core.cfg`，准备两种移动模式与 I 键阶段处理，不覆盖保存的 WASD 或 `I` 绑定。`I` 替代原来的 `show_loadout_toggle`（装备显示切换）。更新时必须一起复制主配置及全部六份 SOCD 文件：
+`autoexec.cfg` 加载 `wifi-socd-core.cfg`，准备 SOCD、旧版兼容别名与 I 键阶段处理，不覆盖保存的 WASD 或 `I` 绑定。`I` 替代原来的 `show_loadout_toggle`（装备显示切换）。更新时必须一起复制主配置及全部六份 SOCD 文件：
 
 | 文件 | 用途 |
 | --- | --- |
 | `autoexec.cfg` | 启动时加载核心定义，保留保存的绑定 |
-| `wifi-socd-core.cfg` | 定义最后输入优先、普通方向抵消、RESET 空操作及 I 键按下/松开处理 |
+| `wifi-socd-core.cfg` | 定义最后输入优先、RESET 空操作及 I 键按下/松开处理，保留旧版模拟 OFF 别名用于兼容 |
 | `wifi-socd.cfg` | 进入 ON，绑定 `+wifi-*`，发送 `SOCD-ON` |
-| `wifi-socd-off.cfg` | 进入 OFF，绑定 `+wifi-normal-*`，发送 `SOCD-OFF` |
+| `wifi-socd-off.cfg` | 进入 OFF，直接绑定原生 `+forward` / `+back` / `+left` / `+right`，发送 `SOCD-OFF` |
 | `wifi-socd-reset-to-off.cfg` | ON → RESET 的按下处理，下一阶段为 OFF |
 | `wifi-socd-reset-to-on.cfg` | OFF → RESET 的按下处理，下一阶段为 ON |
 | `wifi-socd-reset.cfg` | 仅供控制台完整清理移动输入，结束于 OFF |
 
 ON/OFF 中按下 `I`，对应 reset-to 文件只执行一次 `forwardback 0 0 0`，并将 WASD 绑定为空操作；松开同一次 `I` 时，只执行一次 `rightleft 0 0 0`，再将 I 绑定到对应的 RESET 后续处理、保存配置并发送 `SOCD-RESET`。RESET 中下一次完整按下、松开 `I`，在松开时进入 OFF 或 ON。因此每个 I 按下/松开事件最多发送一条移动轴命令，且只在松开时重绑 I，保持按下与释放处理配对。
 
-RESET 阶段 WASD 暂停是预期行为。此循环不使用 `exec_async`，也不会取消 I 绑定。ON/OFF 都通过相同的模拟轴输入处理移动，避免切换时混用数字按钮与模拟轴。核心定义将 `joy_side_sensitivity` 与 `joy_forward_sensitivity` 设为 `1`。
+每次按 I 前必须完全松开 WASD，包括 RESET 阶段；原生 OFF 的按键释放须在重绑前完成，I 仅清理模拟轴，不代替原生移动按钮的释放。RESET 阶段 WASD 暂停是预期行为；两个 RESET 分别记住 OFF 或 ON 目标，回到 ON 后下一次仍进入通往 OFF 的 RESET。此循环不使用 `exec_async`，也不会取消 I 绑定。ON 使用模拟轴，OFF 使用原生移动按钮；旧的 `wifi-normal-*` 仅保留兼容定义，不再由新版 OFF 绑定。核心定义将 `joy_side_sensitivity` 与 `joy_forward_sensitivity` 设为 `1`。
 
 首次安装、旧绑定未更新或需要清理残留移动输入时，先松开 WASD，在控制台执行：
 
@@ -70,7 +70,7 @@ RESET 阶段 WASD 暂停是预期行为。此循环不使用 `exec_async`，也�
 exec wifi-socd-reset
 ```
 
-该控制台恢复脚本清理数字移动按钮与两个模拟轴，最后恢复 OFF 和有效的 I 绑定。不要将它直接绑定到 I，因为它包含多条移动命令。需要恢复后立即开启时，在控制台执行：
+该控制台恢复脚本清理数字移动按钮与两个模拟轴，最后恢复原生 OFF 和有效的 I 绑定。旧版保存的 `+wifi-normal-*` 不会因 `exec autoexec` 自动迁移，应执行一次此恢复命令。不要将它直接绑定到 I，因为它包含多条移动命令。需要恢复后立即开启时，在控制台执行：
 
 ```text
 exec wifi-socd-reset; exec wifi-socd
@@ -80,7 +80,7 @@ exec wifi-socd-reset; exec wifi-socd
 
 执行 `exec autoexec` 或按 `P` 保留当前绑定阶段；重载前应松开所有移动键。不需要强制加载模式的 Steam 启动选项；移除旧的 `+exec wifi-socd` / `+exec wifi-socd-off`，以免覆盖保存的选择。只更新游戏 CFG 而未复制账号按键配置时，执行一次上述控制台恢复命令，安装当前 I 循环。
 
-当前版本已在本地游戏完成两轮循环，并测试了按住 W 或 S 时按 I。此验证不覆盖所有游戏版本和服务器环境；实际行为以当前环境为准。
+用户已确认当前原生 OFF 版本在游戏中实际测试可以工作。切换仍以完全松开 WASD 为使用前提，按住移动键切换不在支持范围内。
 
 ### 音量与麦克风自听
 

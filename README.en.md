@@ -13,13 +13,13 @@ A personal CS2 configuration arranged as a Steam directory tree, with key bindin
 
 The supplied key configuration is saved with SOCD OFF. Each complete press and release of `I` advances one stage in `ON → RESET → OFF → RESET → ON`. From the supplied OFF state, the first press enters RESET and the second enables SOCD. RESET pauses WASD. Team messages report `SOCD-ON`, `SOCD-RESET`, or `SOCD-OFF`.
 
-ON applies last input priority independently to `A` / `D` and `W` / `S`. For example, holding `A` and then pressing `D` switches right; releasing `D` while still holding `A` restores left. OFF uses ordinary opposing-key cancellation. Both modes share the `forwardback` / `rightleft` input path. Reloading the main configuration retains the saved mode or RESET stage.
+ON applies last input priority independently to `A` / `D` and `W` / `S`. For example, holding `A` and then pressing `D` switches right; releasing `D` while still holding `A` restores left. OFF directly binds native `+forward` / `+back` / `+left` / `+right`, with ordinary opposing-key cancellation and native movement during scoreboard interaction. Fully release WASD before switching. Reloading the main configuration retains the saved mode or RESET stage.
 
 ### Key bindings
 
 | Key | Action |
 | --- | --- |
-| `W` / `A` / `S` / `D` | ON: last input priority; OFF: opposing keys cancel; RESET: movement input paused |
+| `W` / `A` / `S` / `D` | ON: last input priority; OFF: native movement; RESET: movement input paused |
 | `/` / `Mouse4` | Toggle an open microphone / push to talk |
 | `I` | Each complete press/release advances ON → RESET → OFF → RESET → ON, sends the corresponding team message, and saves |
 | `O` | Cycle through three crosshair presets; all follow recoil |
@@ -48,21 +48,21 @@ Main locations:
 
 ### SOCD configuration
 
-`autoexec.cfg` loads `wifi-socd-core.cfg`, defining both movement modes and the I-key phase handlers without overwriting saved WASD or `I` bindings. `I` replaces `show_loadout_toggle` (the loadout display toggle). Copy the main configuration and all six SOCD files together when updating:
+`autoexec.cfg` loads `wifi-socd-core.cfg`, defining SOCD, legacy compatibility aliases, and the I-key phase handlers without overwriting saved WASD or `I` bindings. `I` replaces `show_loadout_toggle` (the loadout display toggle). Copy the main configuration and all six SOCD files together when updating:
 
 | File | Purpose |
 | --- | --- |
 | `autoexec.cfg` | Load core definitions at startup while preserving saved bindings |
-| `wifi-socd-core.cfg` | Define last input priority, ordinary opposing-key cancellation, the RESET no-op, and I-key down/up handlers |
+| `wifi-socd-core.cfg` | Define last input priority, the RESET no-op, and I-key down/up handlers; retain legacy analog OFF aliases for compatibility |
 | `wifi-socd.cfg` | Enter ON, bind `+wifi-*`, and send `SOCD-ON` |
-| `wifi-socd-off.cfg` | Enter OFF, bind `+wifi-normal-*`, and send `SOCD-OFF` |
+| `wifi-socd-off.cfg` | Enter OFF, directly bind native `+forward` / `+back` / `+left` / `+right`, and send `SOCD-OFF` |
 | `wifi-socd-reset-to-off.cfg` | Handle ON → RESET key-down; the following stage is OFF |
 | `wifi-socd-reset-to-on.cfg` | Handle OFF → RESET key-down; the following stage is ON |
 | `wifi-socd-reset.cfg` | Console-only full movement recovery, ending in OFF |
 
 Pressing `I` in ON/OFF executes the matching reset-to file: it issues only `forwardback 0 0 0` and binds WASD to a no-op. Releasing that same I press issues only `rightleft 0 0 0`, then selects the corresponding RESET continuation, saves the configuration, and sends `SOCD-RESET`. The next complete I press/release enters OFF or ON on release. Each I down/up event therefore issues at most one movement-axis command. I is rebound only on release so its down/up handlers remain paired.
 
-WASD being paused during RESET is intentional. The cycle does not use `exec_async` or unbind I. ON and OFF use the same analog axes, avoiding mixed digital-button and analog-axis movement state across switches. The core definitions set `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`.
+Fully release WASD before every I press, including during RESET. Native OFF button releases must finish before rebinding; I clears analog axes only and does not synthesize native movement-button releases. WASD being paused during RESET is intentional. The two RESET phases remember different OFF/ON destinations; after returning to ON, the next press enters RESET toward OFF again. The cycle does not use `exec_async` or unbind I. ON uses analog axes; OFF uses native movement buttons. Legacy `wifi-normal-*` definitions remain for compatibility but are no longer bound by the current OFF file. The core definitions set `joy_side_sensitivity` and `joy_forward_sensitivity` to `1`.
 
 For first-time installation, outdated bindings, or recovery from residual movement input, release WASD and run this in the console:
 
@@ -70,7 +70,7 @@ For first-time installation, outdated bindings, or recovery from residual moveme
 exec wifi-socd-reset
 ```
 
-This console recovery script clears digital movement buttons and both analog axes, then restores OFF and a working I binding. Do not bind it directly to I: it contains multiple movement commands. To recover and immediately enable SOCD, run in the console:
+This console recovery script clears digital movement buttons and both analog axes, then restores native OFF and a working I binding. Saved legacy `+wifi-normal-*` bindings are not migrated by `exec autoexec`; run this recovery command once. Do not bind it directly to I: it contains multiple movement commands. To recover and immediately enable SOCD, run in the console:
 
 ```text
 exec wifi-socd-reset; exec wifi-socd
@@ -80,7 +80,7 @@ With WASD released and input state normal, `exec wifi-socd` / `exec wifi-socd-of
 
 Running `exec autoexec` or pressing `P` preserves the current binding stage; release movement keys before reloading. No launch option is needed to force a mode. Remove old `+exec wifi-socd` / `+exec wifi-socd-off` options so they do not override the saved choice. If updating game CFG files without copying the supplied account bindings, run the console recovery command once to install the current I cycle.
 
-This version completed two cycles in the local game, including tests with W or S held while pressing I. That validation does not cover every game version or server environment; actual behavior depends on the current environment.
+The user confirmed that the current native-OFF version works in actual in-game testing. Fully releasing WASD before switching remains a required precondition; switching with movement keys held is unsupported.
 
 ### Volume and microphone self-monitoring
 
